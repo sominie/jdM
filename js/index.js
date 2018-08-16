@@ -1,4 +1,4 @@
-
+/*
         var banner = document.getElementsByClassName("banner")[0];
         
         var pics = document.getElementById("pics").getElementsByTagName("li");
@@ -140,4 +140,92 @@
                 opacity = offsetTop/bannerH*0.8;
                 search.style.backgroundImage =  "-webkit-linear-gradient(rgba(255,0,0,"+ opacity+") 100%,rgba(255,255,255,0) 0%)";
             }
+            if(offsetTop == 0) {
+                search.style.backgroundImage = "-webkit-linear-gradient(-90deg,rgba(0,0,0,0.8) 5%,rgba(255,255,255,0))";
+            }
+        }*/
+window.onload = function() {
+    //头部搜索
+    searchEffect();
+    //轮播图
+    bannerEffect();
+
+}
+
+function searchEffect() {
+    var banner = document.querySelector(".banner");
+    var bannerH = banner.offsetHeight;
+    var search = document.querySelector(".jd_search");
+    window.onscroll = function() {
+        var opacity = 0;
+        var offsetTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if(offsetTop < bannerH) {
+            opacity = offsetTop/bannerH*0.8;
+            search.style.backgroundImage =  "-webkit-linear-gradient(rgba(255,0,0,"+ opacity+") 100%,rgba(255,255,255,0) 0%)";
         }
+        if(offsetTop == 0) {
+            search.style.backgroundImage = "-webkit-linear-gradient(-90deg,rgba(0,0,0,0.8) 5%,rgba(255,255,255,0))";
+        }
+    }
+}
+function bannerEffect() {
+    //添加首尾图片
+    var banner = document.querySelector(".banner");
+    var first = banner.querySelector("li:first-of-type");
+    var last = banner.querySelector("li:last-of-type");
+    var banner_ul = banner.querySelector("ul");
+    banner_ul.insertBefore(last.cloneNode(true),first);
+    banner_ul.appendChild(first.cloneNode(true));
+    //调整banner_ul和li的长度
+    var lis = banner_ul.querySelectorAll("li");
+    var count = lis.length;
+    var bannerW = banner.offsetWidth;
+    banner_ul.style.width = count * bannerW+"px";
+    for(var i=0; i<count; i++) {
+        lis[i].style.width = bannerW+"px";
+    }
+
+    var index = 1;
+    banner_ul.style.left = -bannerW+"px";
+
+    //屏幕变化的时候，重新计算屏幕宽度
+    window.onresize = function() {
+        bannerW = banner.offsetWidth;
+        banner_ul.style.width = count * bannerW+"px";
+        for(var i=0; i<count; i++) {
+            lis[i].style.width = bannerW+"px";
+        }
+        banner_ul.style.left = -bannerW+"px";
+    }
+
+    //实现自动轮播
+    var timer = setInterval(function() {
+        index++;
+        banner_ul.style.transition = "left 0.5s ease";
+        banner_ul.style.left = (-index*bannerW) + "px";
+        setTimeout(function() {
+            if(index == count-1) {
+                index = 1;
+                banner_ul.style.transition = "none";
+                banner_ul.style.left = (-index*bannerW) + "px";
+                
+            }
+        },500);     
+    },2000);
+
+    //实现控制样式的切换
+    var setCtrls = function(index) {
+        var ctrls = document.querySelector(".banner_ctrls");
+        var ctrls_lis = ctrls.querySelectorAll("li");
+        for(var i=0; i<ctrls_lis.length; i++) {
+            ctrls_lis[i].classList.remove("current");
+        }
+        console.log(index);
+        ctrls_lis[index-1].classList.add("current");
+        //ctrls_lis[index-1].className = "current";
+    };
+
+    banner_ul.addEventListener("webkitTransitionEnd",function() {
+        setCtrls(index); 
+    });
+}
